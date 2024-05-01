@@ -94,6 +94,7 @@ def preprocess_data(data_path, tokenizer, label2id, overlap_size=0, keys_to_keep
         - label2id: a dictionary with the labels and their corresponding ids
         - overlap_size: the number of tokens that overlap between two consecutive chunks
         - keys_to_keep: a list with the columns to keep
+            the rows of the columns in keys_to_keep need to be lists of lists, so that the flattening works correctly
         
     outputs:
         - a dataset object with 
@@ -107,7 +108,7 @@ def preprocess_data(data_path, tokenizer, label2id, overlap_size=0, keys_to_keep
 
     print(data)
 
-    keys_to_flatten = ['labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids'] #+ keys_to_keep
+    keys_to_flatten = ['labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids'] + keys_to_keep
 
     print("encoding the labels...")
     data = data.map(partial(encode_labels, label2id = label2id), batched=False)
@@ -147,7 +148,7 @@ if __name__=='__main__':
     
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
-    data = preprocess_data(data_path, tokenizer, label2id, overlap_size=0)
+    data = preprocess_data(data_path, tokenizer, label2id, keys_to_keep=['document'])
 
     print(data)
     
