@@ -23,8 +23,8 @@ class CFG:
     label2id['[PAD]'] = -100
     id2label = {i: label for label, i in label2id.items()}
 
-    __local_path = os.path.abspath(os.path.dirname(__file__))
-    __target_dir = os.path.join(__local_path,'..','models', 'baseline')
+    local_path = os.path.abspath(os.path.dirname(__file__))
+    __target_dir = os.path.join(local_path,'..','models', 'baseline')
 
     training_args = TrainingArguments(
         output_dir=__target_dir, 
@@ -51,8 +51,8 @@ def train_model(data_train, data_eval, model, training_args):
 
 
 if __name__ == '__main__':
-    local_path = os.path.abspath(os.path.dirname(__file__))
-    data_path = os.path.join(local_path, '../data/raw/synthetic/mixtral.json')
+
+    data_path = os.path.join(CFG.local_path, '../data/raw/synthetic/mixtral.json')
 
     tokenizer = AutoTokenizer.from_pretrained(CFG.model_name)
     model = AutoModelForTokenClassification.from_pretrained(CFG.model_name, num_labels=len(CFG.id2label), id2label=CFG.id2label, label2id=CFG.label2id)
