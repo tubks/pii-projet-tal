@@ -1,6 +1,6 @@
 #this file contains the code for the baseline model
 
-from data.dataloader import preprocess_data, CFG
+from data.dataloader import preprocess_data
 import os
 from transformers import AutoTokenizer, AutoModelForTokenClassification, TrainingArguments, Trainer
 
@@ -24,19 +24,22 @@ class CFG:
     id2label = {i: label for label, i in label2id.items()}
 
     local_path = os.path.abspath(os.path.dirname(__file__))
-    __target_dir = os.path.join(local_path,'..','models', 'baseline')
+    target_dir = os.path.join(local_path,'..','models', 'baseline')
 
     training_args = TrainingArguments(
-        output_dir=__target_dir, 
+        output_dir=os.path.join(target_dir, 'trainer'), 
         evaluation_strategy="epoch"
         )
 
 
 
-
 def train_model(data_train, data_eval, model, training_args):
     """
-    Trains the model
+    Takes in:
+        - data_train: training data as a Dataset object
+        - data_eval: evaluation data as a Dataset object
+        - model: a model object
+        - training_args: a TrainingArguments object
     """
     trainer = Trainer(
         model=model,                         
@@ -47,7 +50,8 @@ def train_model(data_train, data_eval, model, training_args):
 
     trainer.train()
 
-    return True
+    model_save_path = os.path.join(CFG.target_dir, 'model')
+    trainer.save_model(model_save_path)
 
 
 if __name__ == '__main__':
@@ -56,5 +60,9 @@ if __name__ == '__main__':
 
     tokenizer = AutoTokenizer.from_pretrained(CFG.model_name)
     model = AutoModelForTokenClassification.from_pretrained(CFG.model_name, num_labels=len(CFG.id2label), id2label=CFG.id2label, label2id=CFG.label2id)
-    data = preprocess_data(data_path, tokenizer, overlap_size=0)
-    print(data)
+    
+    data = preprocess_data(data_path, tokenizer, CFG.label2id, keys_to_keep=['document'])
+
+    test_dir = os.path.join(CFG.local_path,'..','models')
+    list_files = os.listdir(test_dir)
+    print(list_files)
