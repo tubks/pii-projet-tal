@@ -128,11 +128,11 @@ def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_
     if with_labels:
         keys_to_flatten.append('labels')
 
-    print("encoding the labels...")
-    data = data.map(partial(encode_labels, label2id = label2id), batched=False)
+        print("encoding the labels...")
+        data = data.map(partial(encode_labels, label2id = label2id), batched=False)
 
     print("tokenizing and aligning...")
-    data = data.map(partial(tokenize_and_align, tokenizer=tokenizer, overlap_size=overlap_size), batched=False)
+    data = data.map(partial(tokenize_and_align, tokenizer=tokenizer, overlap_size=overlap_size, with_labels = with_labels), batched=False)
 
     print("flattening the data...")
     data = flatten_data(data, keys_to_flatten)
@@ -184,7 +184,7 @@ if __name__=='__main__':
     print('running dataloader.py')
     local_path = os.path.abspath(os.path.dirname(__file__))
     local_path = os.path.join(local_path, '../')
-    data_path = os.path.join(local_path, '../data/raw/synthetic/mixtral.json')
+    data_path = os.path.join(local_path, '../data/raw/test.json')
 
     label2id = {
         'B-NAME_STUDENT': 0, 
