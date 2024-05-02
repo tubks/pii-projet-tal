@@ -3,7 +3,7 @@
 from datasets import Dataset
 from functools import partial, reduce
 from transformers import AutoTokenizer
-from pandas import read_json
+from pandas import read_json, read_csv
 import os
 from tqdm import tqdm
 
@@ -12,6 +12,7 @@ from tqdm import tqdm
 
 def encode_labels(example, label2id):
     """
+    Encodes the labels into integers
     to be used with datasets.map() with batched=False
     
     Encodes the labels into integers.
@@ -22,8 +23,11 @@ def encode_labels(example, label2id):
     return {'labels': encoded}
 
 
-def tokenize_and_align(example, tokenizer, overlap_size = 0):
+
+
+def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0):
     """
+    Tokenizes the input and aligns the labels with the tokens
     To be used with datasets.map() with batched=False
 
     Takes in 
@@ -36,7 +40,9 @@ def tokenize_and_align(example, tokenizer, overlap_size = 0):
             - encoded labels
     """
 
-    org_labels = example['labels']
+    if with_labels:
+        org_labels = example['labels']
+
     tokenized_inputs = tokenizer(example['tokens'], is_split_into_words=True, return_offsets_mapping=True, truncation=True, padding='max_length', max_length=512, return_overflowing_tokens=True, stride=overlap_size, return_tensors='pt')
     tokenized_inputs.pop('overflow_to_sample_mapping')
     tokenized_inputs.pop('offset_mapping')
@@ -50,17 +56,21 @@ def tokenize_and_align(example, tokenizer, overlap_size = 0):
         
         org_word_ids_list.append(ids_of_tokens)
         document_id.append(example['document'])
-        #iterating over ids of tokens
-        chunk_labels = []
-        for id in ids_of_tokens:
-            #if id=None, then it means it's some BERT token (CLS, SEP or PAD)
-            if id is None:
-                chunk_labels.append(-100)
-            else:
-                chunk_labels.append(org_labels[id])
-        new_labels.append(chunk_labels)
 
-    tokenized_inputs['labels'] = new_labels
+        if with_labels:
+            #iterating over ids of tokens
+            chunk_labels = []
+            for id in ids_of_tokens:
+                #if id=None, then it means it's some BERT token (CLS, SEP or PAD)
+                if id is None:
+                    chunk_labels.append(-100)
+                else:
+                    chunk_labels.append(org_labels[id])
+            new_labels.append(chunk_labels)
+
+    if with_labels:
+        tokenized_inputs['labels'] = new_labels
+    
     tokenized_inputs['org_word_ids'] = org_word_ids_list
     tokenized_inputs['document'] = document_id
 
@@ -68,6 +78,8 @@ def tokenize_and_align(example, tokenizer, overlap_size = 0):
 
 def flatten_data(data, keys_to_flatten):
     """
+    Flattens the rows of the datasets object for the keys_to_flatten columns
+
     Takes in:
         - data: a dataset object
         - keys_to_flatten: a list with the keys to flatten
@@ -77,23 +89,22 @@ def flatten_data(data, keys_to_flatten):
 
     data_flat = {}
 
-
     for key in tqdm(keys_to_flatten):
         data_flat[key] = reduce(lambda x,y: x+y, data[key])
 
     return Dataset.from_dict(data_flat)
 
 
-def preprocess_data(data_path, tokenizer, label2id, overlap_size=0, keys_to_keep=[]):
+def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_size=0, keys_to_keep=[]):
     """
     Preprocesses the data
     
     Takes in 
-        - data: a string with the path to the data
+        - data: a dataset object with columns 'document', 'tokens' (if with_labels=True, also has to have 'labels')
         - tokenizer: a tokenizer object
-        - label2id: a dictionary with the labels and their corresponding ids
+        - label2id: a dictionary with the labels and their corresponding ids. If with_labels=True, this has to be provided 
         - overlap_size: the number of tokens that overlap between two consecutive chunks
-        - keys_to_keep: a list with additional columns to keep (except 'labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids')
+        - keys_to_keep : a list with additional columns to keep (except 'labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids')
             the rows of the columns in keys_to_keep need to be lists of lists, so that the flattening works correctly
         
     outputs:
@@ -101,13 +112,19 @@ def preprocess_data(data_path, tokenizer, label2id, overlap_size=0, keys_to_keep
             - the keys_to_keep + 'labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids' columns
             - the 'labels' column encoded
     """
-    
-    data_pd = read_json(data_path)
-    data = Dataset.from_pandas(data_pd)
+
+    assert 'document' in data.column_names, "data has to have a 'document' column"
+    assert 'tokens' in data.column_names, "data has to have a 'tokens' column"
+    if with_labels:
+        assert 'labels' in data.column_names, "data has to have a 'labels' column"
+        assert label2id, "label2id has to be provided if with_labels=True"
 
     print(data)
 
-    keys_to_flatten = list(set(['labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids'] + keys_to_keep))
+    keys_to_flatten = list(set(['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document'] + keys_to_keep))
+
+    if with_labels:
+        keys_to_flatten.append('labels')
 
     print("encoding the labels...")
     data = data.map(partial(encode_labels, label2id = label2id), batched=False)
@@ -119,6 +136,46 @@ def preprocess_data(data_path, tokenizer, label2id, overlap_size=0, keys_to_keep
     data = flatten_data(data, keys_to_flatten)
     
     return data
+
+def get_dataset_from_path(data_path):
+    """
+    Loads a dataset from a path and returns it as a datasets object
+
+    Takes in 
+        - data: a string with the path to the data (has to be a json or csv file)
+    
+    outputs:
+        - a datasets object
+    """
+
+    filetype = data_path.split('.')[-1]
+    data = None
+    if filetype == 'json':
+        data = read_json(data_path)
+    elif filetype == 'csv':
+        data = read_csv(data_path)
+    else:
+        raise ValueError('Filetype not supported. Suuported filetypes are: json, csv')
+    
+    data = Dataset.from_pandas(data)
+
+    return data
+
+def get_train_val_test_split(data, seed, val_size=0.1, test_size=0.1):
+    """
+    Takes in:
+        - data: a dataset object
+        - seed: the seed for the random split
+        - val_size: the size of the validation set
+        - test_size: the size of the test set
+    Outputs:
+        - a tuple with data_train, data_val, data_test
+    """
+
+    data = data.train_test_split(test_size=test_size, seed = seed)
+    data_train_val = data['train'].train_test_split(test_size=val_size, seed = seed)
+
+    return data_train_val['train'], data_train_val['test'], data['test']
 
 
 if __name__=='__main__':
@@ -147,7 +204,11 @@ if __name__=='__main__':
     
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
-    data = preprocess_data(data_path, tokenizer, label2id, keys_to_keep=['document', 'org_word_ids'])
+    data = get_dataset_from_path(data_path)
+    data = preprocess_data(data, tokenizer, label2id, with_labels=False)
 
-    print(data)
+    print('dataset\n',data)
+
+    # train, val, test = get_train_val_test_split(data, seed=42, val_size=0.1, test_size=0.1)
+    # print('\ntrain:\n',train,'\nval:\n', val, '\ntest:\n', test)
     
