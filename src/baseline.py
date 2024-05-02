@@ -33,27 +33,6 @@ class CFG:
 
 
 
-def train_model(data_train, data_eval, model, training_args):
-    """
-    Takes in:
-        - data_train: training data as a Dataset object
-        - data_eval: evaluation data as a Dataset object
-        - model: a model object
-        - training_args: a TrainingArguments object
-    """
-    trainer = Trainer(
-        model=model,                         
-        args=CFG.training_args,                  
-        train_dataset=data_train,         
-        eval_dataset=data_eval             
-    )
-
-    trainer.train()
-
-    model_save_path = os.path.join(CFG.target_dir, 'model')
-    trainer.save_model(model_save_path)
-
-
 if __name__ == '__main__':
 
     data_path = os.path.join(CFG.local_path, '../data/raw/synthetic/mixtral.json')
