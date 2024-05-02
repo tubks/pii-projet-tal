@@ -3,7 +3,7 @@
 from data.dataloader import preprocess_data
 import os
 from transformers import AutoTokenizer, AutoModelForTokenClassification, TrainingArguments, Trainer
-
+from utils import train_model
 
 
 class CFG:
@@ -42,6 +42,6 @@ if __name__ == '__main__':
     
     data = preprocess_data(data_path, tokenizer, CFG.label2id, keys_to_keep=['document'])
 
-    test_dir = os.path.join(CFG.local_path,'..','models')
-    list_files = os.listdir(test_dir)
-    print(list_files)
+    test_dir = os.path.join(CFG.local_path,'..','models', 'baseline')
+    
+    trainer = train_model(data, model, CFG.training_args, test_dir)
