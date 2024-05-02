@@ -102,14 +102,16 @@ def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_
     Takes in 
         - data: a dataset object with columns 'document', 'tokens' (if with_labels=True, also has to have 'labels')
         - tokenizer: a tokenizer object
-        - label2id: a dictionary with the labels and their corresponding ids. If with_labels=True, this has to be provided 
-        - overlap_size: the number of tokens that overlap between two consecutive chunks
+        - label2id: a dictionary with the labels and their corresponding ids. If with_labels=True, this has to be provided. By default, it's an empty dictionary.
+        - with_labels: a boolean indicating if the data has labels. By default, it's True.
+        - overlap_size: the number of tokens that overlap between two consecutive chunks. By default, it's 0.
         - keys_to_keep : a list with additional columns to keep (except 'labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids')
             the rows of the columns in keys_to_keep need to be lists of lists, so that the flattening works correctly
+            By default, it's an empty list.
         
     outputs:
         - a dataset object with 
-            - the keys_to_keep + 'labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids' columns
+            - the keys_to_keep + 'labels' (if with_labels=True), 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids' columns
             - the 'labels' column encoded
     """
 
