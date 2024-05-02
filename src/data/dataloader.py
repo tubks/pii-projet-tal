@@ -95,7 +95,7 @@ def flatten_data(data, keys_to_flatten):
     return Dataset.from_dict(data_flat)
 
 
-def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_size=0, keys_to_keep=[]):
+def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_size=0, keys_to_flatten=['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document']):
     """
     Preprocesses the data
     
@@ -105,14 +105,10 @@ def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_
         - label2id: a dictionary with the labels and their corresponding ids. If with_labels=True, this has to be provided. By default, it's an empty dictionary.
         - with_labels: a boolean indicating if the data has labels. By default, it's True.
         - overlap_size: the number of tokens that overlap between two consecutive chunks. By default, it's 0.
-        - keys_to_keep : a list with additional columns to keep (except 'labels', 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids')
-            the rows of the columns in keys_to_keep need to be lists of lists, so that the flattening works correctly
-            By default, it's an empty list.
+        - keys_to_flatten : a list of columns to keep in the output dataset. By default, it's ['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document']
         
     outputs:
-        - a dataset object with 
-            - the keys_to_keep + 'labels' (if with_labels=True), 'input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids' columns
-            - the 'labels' column encoded
+        - a dataset object with keys_to_flatten columns
     """
 
     assert 'document' in data.column_names, "data has to have a 'document' column"
@@ -120,10 +116,6 @@ def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_
     if with_labels:
         assert 'labels' in data.column_names, "data has to have a 'labels' column"
         assert label2id, "label2id has to be provided if with_labels=True"
-
-    print(data)
-
-    keys_to_flatten = list(set(['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document'] + keys_to_keep))
 
     if with_labels:
         keys_to_flatten.append('labels')
