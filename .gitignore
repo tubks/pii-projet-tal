@@ -2,3 +2,4 @@
 /data/raw
 /notebooks/model
 /model_files
+__pycache__/
