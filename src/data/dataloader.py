@@ -88,7 +88,7 @@ def flatten_data(data, keys_to_flatten):
     data_flat = {}
 
     for key in tqdm(keys_to_flatten):
-        data_flat[key] = reduce(lambda x,y: x+y, data[key])
+        data_flat[key] = reduce(lambda x, y: x + y, data[key])
 
     return Dataset.from_dict(data_flat)
 
