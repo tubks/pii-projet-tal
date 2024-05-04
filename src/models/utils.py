@@ -5,7 +5,7 @@ import torch
 
 from itertools import chain
 from collections import Counter
-from seqeval.metrics import recall_score, precision_score, accuracy_score
+from seqeval.metrics import recall_score, precision_score
 
 
 def get_fbeta_score(precision, recall, beta=5.0):
@@ -172,3 +172,6 @@ def weight_to_tensor(weight_dict):
 def save_model(model_name, target_dir):
     return os.path.join(target_dir, model_name)
      
+
+def save_model_to_huggingface(model, token="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", save_path="zeinab-sheikhi/"):
+    model.push_to_hub(save_path, token=token)
