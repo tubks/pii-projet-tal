@@ -39,9 +39,8 @@ def tokenize_and_align(example, tokenizer, with_labels=True, overlap_size=0):
     if with_labels:
         org_labels = example['labels']
 
-    tokenized_inputs = tokenizer(example['tokens'], is_split_into_words=True, return_offsets_mapping=True, truncation=True, padding='max_length', max_length=512, return_overflowing_tokens=True, stride=overlap_size, return_tensors='pt')
+    tokenized_inputs = tokenizer(example['tokens'], is_split_into_words=True, truncation=True, padding='max_length', max_length=512, return_overflowing_tokens=True, stride=overlap_size, return_tensors='pt')
     tokenized_inputs.pop('overflow_to_sample_mapping')
-    tokenized_inputs.pop('offset_mapping')
     
     new_labels = []
     org_word_ids_list = []
@@ -196,9 +195,10 @@ if __name__ == '__main__':
         'O': 14, 
         '[PAD]': -100}
     
-    tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+    tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
 
     data = get_dataset_from_path(data_path)
     data = preprocess_data(data, tokenizer, label2id, with_labels=False)
 
     print('dataset\n', data)
+    print('detokenized\n', tokenizer.batch_decode(data['input_ids'][:3]))
