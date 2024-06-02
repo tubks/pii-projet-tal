@@ -8,10 +8,6 @@ import os
 from tqdm import tqdm
 
 
-
-
-
-
 def encode_labels(example, label2id):
     """
     Encodes the labels into integers
@@ -23,11 +19,6 @@ def encode_labels(example, label2id):
     labels = example['labels']
     encoded = [label2id[label] for label in labels]
     return {'labels': encoded}
-
-
-
-
-def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0):
 
 
 def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0):
@@ -103,7 +94,6 @@ def flatten_data(data, keys_to_flatten):
     return Dataset.from_dict(data_flat)
 
 
-def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_size=0, keys_to_flatten=['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document']):
 def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_size=0, keys_to_flatten=['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document']):
     """
     Preprocesses the data
@@ -185,8 +175,7 @@ def get_train_val_test_split(data, seed, val_size=0.1, test_size=0.1):
     return data_train_val['train'], data_train_val['test'], data['test']
 
 
-if __name__=='__main__':
-if __name__=='__main__':
+if __name__ == '__main__':
     print('running dataloader.py')
     local_path = os.path.abspath(os.path.dirname(__file__))
     local_path = os.path.join(local_path, '../')
@@ -215,8 +204,7 @@ if __name__=='__main__':
     data = get_dataset_from_path(data_path)
     data = preprocess_data(data, tokenizer, label2id, with_labels=False)
 
-    print('dataset\n',data)
+    print('dataset\n', data)
 
     # train, val, test = get_train_val_test_split(data, seed=42, val_size=0.1, test_size=0.1)
     # print('\ntrain:\n',train,'\nval:\n', val, '\ntest:\n', test)
-    
