@@ -21,7 +21,7 @@ def encode_labels(example, label2id):
     return {'labels': encoded}
 
 
-def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0):
+def tokenize_and_align(example, tokenizer, with_labels=True, overlap_size=0):
     """
     Tokenizes the input and aligns the labels with the tokens
     To be used with datasets.map() with batched=False
@@ -46,8 +46,8 @@ def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0)
     new_labels = []
     org_word_ids_list = []
     document_id = []
-    #iterating over chunks
-    #iterating over chunks
+    
+    # iterating over chunks
     for i, chunk in enumerate(tokenized_inputs['input_ids']):
         ids_of_tokens = tokenized_inputs.word_ids(i)
         
@@ -55,12 +55,11 @@ def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0)
         document_id.append(example['document'])
 
         if with_labels:
-            #iterating over ids of tokens
-            #iterating over ids of tokens
+            
+            # iterating over ids of tokens
             chunk_labels = []
             for id in ids_of_tokens:
-                #if id=None, then it means it's some BERT token (CLS, SEP or PAD)
-                #if id=None, then it means it's some BERT token (CLS, SEP or PAD)
+                # if id=None, then it means it's some BERT token (CLS, SEP or PAD)
                 if id is None:
                     chunk_labels.append(-100)
                 else:
@@ -74,6 +73,7 @@ def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0)
     tokenized_inputs['document'] = document_id
 
     return tokenized_inputs
+
 
 def flatten_data(data, keys_to_flatten):
     """
@@ -89,12 +89,12 @@ def flatten_data(data, keys_to_flatten):
     data_flat = {}
 
     for key in tqdm(keys_to_flatten):
-        data_flat[key] = reduce(lambda x,y: x+y, data[key])
+        data_flat[key] = reduce(lambda x, y: x + y, data[key])
 
     return Dataset.from_dict(data_flat)
 
 
-def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_size=0, keys_to_flatten=['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document']):
+def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size=0, keys_to_flatten=['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document']):
     """
     Preprocesses the data
     
@@ -122,15 +122,16 @@ def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_
         keys_to_flatten.append('labels')
 
         print("encoding the labels...")
-        data = data.map(partial(encode_labels, label2id = label2id), batched=False)
+        data = data.map(partial(encode_labels, label2id=label2id), batched=False)
 
     print("tokenizing and aligning...")
-    data = data.map(partial(tokenize_and_align, tokenizer=tokenizer, overlap_size=overlap_size, with_labels = with_labels), batched=False)
+    data = data.map(partial(tokenize_and_align, tokenizer=tokenizer, overlap_size=overlap_size, with_labels=with_labels), batched=False)
 
     print("flattening the data...")
     data = flatten_data(data, keys_to_flatten)
     
     return data
+
 
 def get_dataset_from_path(data_path):
     """
@@ -156,6 +157,7 @@ def get_dataset_from_path(data_path):
 
     return data
 
+
 def get_train_val_test_split(data, seed, val_size=0.1, test_size=0.1):
     """
     Takes in:
@@ -167,10 +169,10 @@ def get_train_val_test_split(data, seed, val_size=0.1, test_size=0.1):
         - a tuple with data_train, data_val, data_test
     """
 
-    data = data.train_test_split(test_size=test_size, seed = seed)
-    data_train_val = data['train'].train_test_split(test_size=val_size, seed = seed)
-    data = data.train_test_split(test_size=test_size, seed = seed)
-    data_train_val = data['train'].train_test_split(test_size=val_size, seed = seed)
+    data = data.train_test_split(test_size=test_size, seed=seed)
+    data_train_val = data['train'].train_test_split(test_size=val_size, seed=seed)
+    data = data.train_test_split(test_size=test_size, seed=seed)
+    data_train_val = data['train'].train_test_split(test_size=val_size, seed=seed)
 
     return data_train_val['train'], data_train_val['test'], data['test']
 
