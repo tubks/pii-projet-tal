@@ -4,3 +4,4 @@
 /model_files
 __pycache__/
 /models/
+/notebooks/test_trainer/
