@@ -4,7 +4,7 @@ import spacy_wrap
 from spacy_streamlit import visualize_ner
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 import torch
-from src.classes.displacy_input import displacy_input
+#from src.classes.displacy_input import displacy_input
 ###
 # ----------------------------------------------------------
 #
