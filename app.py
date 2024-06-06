@@ -1,6 +1,5 @@
 import streamlit as st
 import spacy
-import spacy_wrap
 from spacy_streamlit import visualize_ner
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 import torch
