@@ -24,30 +24,6 @@ from spacy.language import Language
 #
 
 
-# chat gpt code to test if it fixes it
-@Language.factory("token_classification_transformer")
-def create_custom_ner_component(nlp, name, config):
-    from transformers import pipeline
-
-    class CustomNERComponent:
-        def __init__(self, nlp, name, config):
-            self.nlp = nlp
-            self.name = name
-            self.model = pipeline("ner", model=config["model"]["name"])
-            self.labels = config["labels"]
-        
-        def __call__(self, doc):
-            ner_results = self.model(doc.text)
-            entities = []
-            for result in ner_results:
-                if result['entity'] in self.labels:
-                    entities.append(doc.char_span(result['start'], result['end'], label=result['entity']))
-            doc.ents = entities
-            return doc
-    
-    return CustomNERComponent(nlp, name, config)
-# /chat gpt code to test if it fixes it
-
 # setting up spacy
 
 nlp = spacy.blank("en")
