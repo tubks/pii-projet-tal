@@ -2,3 +2,4 @@ en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_
 spacy-streamlit
 spacy
 streamlit
+spacy-transformers
