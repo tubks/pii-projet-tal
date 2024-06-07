@@ -1,5 +1,0 @@
-spacy
-spacy_streamlit
-transformers
-streamlit
-spacy-transformers
