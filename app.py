@@ -17,6 +17,10 @@ from transformers import AutoModelForTokenClassification, AutoTokenizer
 # ----------------------------------------------------------
 ###
 
+#
+# saving the environment in the pip format, without weird outputs : pip list --format=freeze > requirements.txt
+#
+
 # setting up spacy
 nlp = spacy.blank("en")
 
