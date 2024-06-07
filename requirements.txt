@@ -3,3 +3,4 @@ spacy-streamlit
 spacy
 streamlit
 spacy-transformers
+transformers
