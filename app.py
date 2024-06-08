@@ -1,8 +1,6 @@
 import streamlit as st
 import spacy
 from spacy_streamlit import visualize_ner
-from transformers import AutoModelForTokenClassification, AutoTokenizer
-from spacy.language import Language
 
 #from src.classes.displacy_input import displacy_input
 ###
