@@ -1,6 +1,6 @@
 #this file contains the code for the baseline model
 
-from data.dataloader import preprocess_data
+from preprocessing import preprocess_data
 import os
 from transformers import AutoTokenizer, AutoModelForTokenClassification, TrainingArguments, Trainer
 from utils import train_model
