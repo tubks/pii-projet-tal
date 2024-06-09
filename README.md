@@ -10,14 +10,12 @@ Reliable automated techniques could allow researchers and industry to tap into t
 
 ## Project Structure
 
-- `configs/`: Configuration, training parameters, loggin and parameters for each model
-- `data/`: Directory for storing raw and processed datasets
-  - `processed/`: The final, canonical datasets for modeling
-  - `raw/`: The original, immutable dataseTt
-- `models/`: Trained and serialized models, model predictions, or model summaries
+
+- `models/`: Directory for storing the fine-tuned models
 - `notebooks/`: Jupyter notebooks
-- `/src`: Source source for use in the project
-  - `data/`: Scripts to download and generated data
-  - `features/`: Scripts to turn raw data into features for modeling
-  - `models/`: Scripts to train models and use them to make predictions
-  - `visualization/`: Scripts to create explanatory and result-oriented visulaizations
+  - `baseline.ipynb`: an example file for the training procedure that was used
+  - `exploration.ipynb`: a notebook containing dataset exploration
+- `src/`: Source code used in this project
+  - `preprocessing.py`: Methods used to load and preprocess the dataset
+  - `trainer.py`: Custom Trainer class created for the experiments with a custom Loss function
+  - `utils.py`: Methods used for the training (such as the computing the metrics)
