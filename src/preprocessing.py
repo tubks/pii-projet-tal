@@ -8,6 +8,7 @@ import os
 from tqdm import tqdm
 
 
+
 def encode_labels(example, label2id):
     """
     Encodes the labels into integers
@@ -19,6 +20,8 @@ def encode_labels(example, label2id):
     labels = example['labels']
     encoded = [label2id[label] for label in labels]
     return {'labels': encoded}
+
+
 
 
 def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0):
@@ -47,7 +50,6 @@ def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0)
     org_word_ids_list = []
     document_id = []
     #iterating over chunks
-    #iterating over chunks
     for i, chunk in enumerate(tokenized_inputs['input_ids']):
         ids_of_tokens = tokenized_inputs.word_ids(i)
         
@@ -56,10 +58,8 @@ def tokenize_and_align(example, tokenizer, with_labels = True, overlap_size = 0)
 
         if with_labels:
             #iterating over ids of tokens
-            #iterating over ids of tokens
             chunk_labels = []
             for id in ids_of_tokens:
-                #if id=None, then it means it's some BERT token (CLS, SEP or PAD)
                 #if id=None, then it means it's some BERT token (CLS, SEP or PAD)
                 if id is None:
                     chunk_labels.append(-100)
@@ -121,11 +121,11 @@ def preprocess_data(data, tokenizer, label2id = {}, with_labels = True, overlap_
     if with_labels:
         keys_to_flatten.append('labels')
 
-        print("encoding the labels...")
-        data = data.map(partial(encode_labels, label2id = label2id), batched=False)
+    print("encoding the labels...")
+    data = data.map(partial(encode_labels, label2id = label2id), batched=False)
 
     print("tokenizing and aligning...")
-    data = data.map(partial(tokenize_and_align, tokenizer=tokenizer, overlap_size=overlap_size, with_labels = with_labels), batched=False)
+    data = data.map(partial(tokenize_and_align, tokenizer=tokenizer, overlap_size=overlap_size), batched=False)
 
     print("flattening the data...")
     data = flatten_data(data, keys_to_flatten)
@@ -169,13 +169,11 @@ def get_train_val_test_split(data, seed, val_size=0.1, test_size=0.1):
 
     data = data.train_test_split(test_size=test_size, seed = seed)
     data_train_val = data['train'].train_test_split(test_size=val_size, seed = seed)
-    data = data.train_test_split(test_size=test_size, seed = seed)
-    data_train_val = data['train'].train_test_split(test_size=val_size, seed = seed)
 
     return data_train_val['train'], data_train_val['test'], data['test']
 
 
-if __name__ == '__main__':
+if __name__=='__main__':
     print('running dataloader.py')
     local_path = os.path.abspath(os.path.dirname(__file__))
     local_path = os.path.join(local_path, '../')
@@ -205,6 +203,5 @@ if __name__ == '__main__':
     data = preprocess_data(data, tokenizer, label2id, with_labels=False)
 
     print('dataset\n', data)
-
-    # train, val, test = get_train_val_test_split(data, seed=42, val_size=0.1, test_size=0.1)
-    # print('\ntrain:\n',train,'\nval:\n', val, '\ntest:\n', test)
+    print('detokenized\n', tokenizer.batch_decode(data['input_ids'][:3]))
+    
