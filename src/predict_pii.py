@@ -1,5 +1,5 @@
 from preprocessing import get_dataset_from_path, preprocess_data
-from transformers import AutoTokenizer, AutoModelForTokenClassification
+from prediction import predict, tokenizer, model, label2id
 import numpy as np
 import pandas as pd
 
@@ -18,46 +18,20 @@ if __name__ == "__main__":
     The columns in the output file will correspond to the essay id, the token id and the assigned non-O label.
     """
     print(help)
-    tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
-    model = AutoModelForTokenClassification.from_pretrained(
-        "zmilczarek/pii-detection-baseline-head-only-v0.1", force_download=True)
-    label2id = {
-        'B-NAME_STUDENT': 0,
-        'B-EMAIL': 1,
-        'B-USERNAME': 2,
-        'B-ID_NUM': 3,
-        'B-PHONE_NUM': 4,
-        'B-URL_PERSONAL': 5,
-        'B-STREET_ADDRESS': 6,
-        'I-NAME_STUDENT': 7,
-        'I-EMAIL': 8,
-        'I-USERNAME': 9,
-        'I-ID_NUM': 10,
-        'I-PHONE_NUM': 11,
-        'I-URL_PERSONAL': 12,
-        'I-STREET_ADDRESS': 13,
-        'O': 14,
-        '[PAD]': -100}
+
     data_path = input("Input your path to the .json datafile: ")
+
     data = get_dataset_from_path(data_path)
     data_tokenized = preprocess_data(
         data, tokenizer, label2id=label2id, with_labels=False)
     data_tokenized.set_format(
         type='pt', columns=['input_ids', 'token_type_ids', 'attention_mask'])
+    predictions = predict(data_tokenized)
 
-    def get_embeddings(example):
-        inputs = {'input_ids': example['input_ids'], 'token_type_ids': example['token_type_ids'],
-                  'attention_mask': example['attention_mask']}
-        return model(**inputs)
-    print("getting the predictions...")
-    outputs = data_tokenized.map(get_embeddings, batched=True, batch_size=4)
-    predictions = outputs['logits'].detach().numpy()
-    test_preds = np.argmax(predictions, axis=-1)
-    print(len(test_preds))
     document_list = []
     token_id_list = []
     label_id_list = []
-    for doc, token_id, pred in zip(data_tokenized['document'], data_tokenized['org_word_ids'], test_preds):
+    for doc, token_id, pred in zip(data_tokenized['document'], data_tokenized['org_word_ids'], predictions):
         for j in range(len(pred)):
             current_word_id = token_id[j]
             if pred[j] != 14 and token_id[j] != None:
@@ -72,6 +46,7 @@ if __name__ == "__main__":
             "label_id": label_id_list,
         }
     )
+    print(pred_df)
     # map integer label to BIO format label
     pred_df["label"] = pred_df.label_id.map(model.config.id2label)
     no_duplicates_df = pred_df.drop_duplicates(
@@ -80,5 +55,7 @@ if __name__ == "__main__":
         columns=["label_id"])  # remove extra columns
     final_df = final_df.rename_axis(
         "row_id").reset_index()  # add `row_id` column
-    final_df.to_csv("submission.csv", index=False)
+    final_df.to_csv("result_pii.csv", index=False)
+    print(final_df)
+
     print(f"Successfully saved predictions for your file in result_pii.csv")
