@@ -92,7 +92,7 @@ def flatten_data(data, keys_to_flatten):
     return Dataset.from_dict(data_flat)
 
 
-def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size=0, keys_to_flatten=['input_ids', 'token_type_ids', 'attention_mask', 'org_word_ids', 'document']):
+def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size=0, keys_to_flatten=['input_ids', 'attention_mask', 'org_word_ids', 'document']):
     """
     Preprocesses the data
 
@@ -130,7 +130,7 @@ def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size
     print("flattening the data...")
     data = flatten_data(data, keys_to_flatten)
     data.set_format(
-        type='pt', columns=['input_ids', 'token_type_ids', 'attention_mask'])
+        type='pt', columns=['input_ids', 'attention_mask'])
     return data
 
 

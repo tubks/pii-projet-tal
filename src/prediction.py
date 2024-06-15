@@ -2,9 +2,10 @@ from transformers import AutoTokenizer, AutoModelForTokenClassification
 import numpy as np
 import torch
 
-tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
+tokenizer = AutoTokenizer.from_pretrained(
+    'roberta-base', add_prefix_space=True)
 model = AutoModelForTokenClassification.from_pretrained(
-    "zmilczarek/pii-detection-baseline-v0.3")
+    "zeinab-sheikhi/roberta-pii-detection")
 label2id = {
     'B-NAME_STUDENT': 0,
     'B-EMAIL': 1,
@@ -25,7 +26,7 @@ label2id = {
 
 
 def get_embeddings(example):
-    inputs = {'input_ids': example['input_ids'], 'token_type_ids': example['token_type_ids'],
+    inputs = {'input_ids': example['input_ids'],
               'attention_mask': example['attention_mask']}
     return model(**inputs)
 
