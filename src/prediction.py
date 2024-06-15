@@ -4,7 +4,7 @@ import torch
 
 tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
 model = AutoModelForTokenClassification.from_pretrained(
-    "zeinab-sheikhi/deberta-pii-detection")
+    "zmilczarek/pii-detection-baseline-v0.3")
 label2id = {
     'B-NAME_STUDENT': 0,
     'B-EMAIL': 1,
@@ -33,7 +33,9 @@ def get_embeddings(example):
 def predict(preprocessed_data):
     print("getting the predictions...")
     outputs = preprocessed_data.map(get_embeddings, batched=True, batch_size=4)
-    predictions = torch.nn.functional.softmax(outputs['logits'], dim=-1)
-    predictions = predictions.detach().numpy()
-    predictions = np.argmax(predictions, axis=-1)
+    logits = torch.nn.functional.softmax(outputs['logits'], dim=-1)
+    logits = (outputs['logits']).detach().numpy()
+    predictions = np.argmax(logits, axis=-1)
+    print(outputs)
+    print(len(predictions))
     return predictions

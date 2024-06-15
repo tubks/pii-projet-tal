@@ -39,7 +39,7 @@ def tokenize_and_align(example, tokenizer, with_labels=True, overlap_size=0):
     if with_labels:
         org_labels = example['labels']
 
-    tokenized_inputs = tokenizer(example['tokens'], is_split_into_words=True, truncation=True, padding='max_length',
+    tokenized_inputs = tokenizer(example['token_string'], is_split_into_words=True, truncation=True, padding='max_length',
                                  max_length=512, return_overflowing_tokens=True, stride=overlap_size, return_tensors='pt')
     tokenized_inputs.pop('overflow_to_sample_mapping')
 
@@ -97,7 +97,7 @@ def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size
     Preprocesses the data
 
     Takes in 
-        - data: a dataset object with columns 'document', 'tokens' (if with_labels=True, also has to have 'labels')
+        - data: a dataset object with columns 'document', 'token_string' (if with_labels=True, also has to have 'labels')
         - tokenizer: a tokenizer object
         - label2id: a dictionary with the labels and their corresponding ids. If with_labels=True, this has to be provided. By default, it's an empty dictionary.
         - with_labels: a boolean indicating if the data has labels. By default, it's True.
@@ -109,7 +109,7 @@ def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size
     """
 
     assert 'document' in data.column_names, "data has to have a 'document' column"
-    assert 'tokens' in data.column_names, "data has to have a 'tokens' column"
+    assert 'token_string' in data.column_names, "data has to have a 'token_string' column"
     if with_labels:
         assert 'labels' in data.column_names, "data has to have a 'labels' column"
         assert label2id, "label2id has to be provided if with_labels=True"
@@ -129,7 +129,8 @@ def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size
 
     print("flattening the data...")
     data = flatten_data(data, keys_to_flatten)
-
+    data.set_format(
+        type='pt', columns=['input_ids', 'token_type_ids', 'attention_mask'])
     return data
 
 
