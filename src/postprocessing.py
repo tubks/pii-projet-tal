@@ -2,7 +2,7 @@ from prediction import model
 import pandas as pd
 
 
-def postprocess_data(data_tokenized, predictions):
+def postprocess_data(dataset, data_tokenized, predictions):
     document_list = []
     token_id_list = []
     label_id_list = []
@@ -12,7 +12,6 @@ def postprocess_data(data_tokenized, predictions):
                 document_list.append(doc)
                 token_id_list.append(token_id[j])
                 label_id_list.append(pred[j])
-    print(label_id_list, token_id_list, document_list)
     pred_df = pd.DataFrame(
         {
             "document": document_list,
@@ -29,6 +28,10 @@ def postprocess_data(data_tokenized, predictions):
         columns=["label_id"])  # remove extra columns
     final_df = final_df.rename_axis(
         "row_id").reset_index()  # add `row_id` column
-    final_df.to_csv("result_pii.csv", index=False)
-    print(final_df)
-    return final_df
+    ds_df = dataset.to_pandas()
+    ds_df = ds_df.explode(['token_id', 'token_string', 'labels'])
+    df_back_to_token_string = pd.merge(
+        ds_df, final_df, how='inner', on=['token_id', 'document'])
+    aligned_pii = df_back_to_token_string[[
+        'document', 'token_id', 'token_string', 'label']]
+    return aligned_pii

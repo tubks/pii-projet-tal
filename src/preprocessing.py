@@ -7,6 +7,24 @@ from pandas import read_json, read_csv
 import os
 from tqdm import tqdm
 
+label2id = {
+    'B-NAME_STUDENT': 0,
+    'B-EMAIL': 1,
+    'B-USERNAME': 2,
+    'B-ID_NUM': 3,
+    'B-PHONE_NUM': 4,
+    'B-URL_PERSONAL': 5,
+    'B-STREET_ADDRESS': 6,
+    'I-NAME_STUDENT': 7,
+    'I-EMAIL': 8,
+    'I-USERNAME': 9,
+    'I-ID_NUM': 10,
+    'I-PHONE_NUM': 11,
+    'I-URL_PERSONAL': 12,
+    'I-STREET_ADDRESS': 13,
+    'O': 14,
+    '[PAD]': -100}
+
 
 def encode_labels(example, label2id):
     """
@@ -92,6 +110,10 @@ def flatten_data(data, keys_to_flatten):
     return Dataset.from_dict(data_flat)
 
 
+def add_token_ids(example):
+    return {'token_id': [i for i in range(len(example['token_string']))]}
+
+
 def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size=0, keys_to_flatten=['input_ids', 'attention_mask', 'org_word_ids', 'document']):
     """
     Preprocesses the data
@@ -113,8 +135,6 @@ def preprocess_data(data, tokenizer, label2id={}, with_labels=True, overlap_size
     if with_labels:
         assert 'labels' in data.column_names, "data has to have a 'labels' column"
         assert label2id, "label2id has to be provided if with_labels=True"
-
-    print(data)
 
     if with_labels:
         keys_to_flatten.append('labels')
