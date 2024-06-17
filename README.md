@@ -18,7 +18,6 @@ The following Personally Identifiable Information (PII) Data Detection project w
 ## Project Structure
 
 - `data/test/ten_essays_test.json`: an example file for testing the cli_app.py
-- `models/`: Directory for storing the fine-tuned models
 - `notebooks/`: Jupyter notebooks
   - `baseline.ipynb`: an example file for the training procedure that was used
   - `exploration.ipynb`: a notebook containing dataset exploration
