@@ -26,7 +26,6 @@ label2id = {
     'O': 14,
     '[PAD]': -100}
 
-
 def encode_labels(example, label2id):
     """
     Encodes the labels into integers
@@ -222,11 +221,12 @@ if __name__ == '__main__':
         'I-STREET_ADDRESS': 13,
         'O': 14,
         '[PAD]': -100}
-
-    tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
+    
+    tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
     data = get_dataset_from_path(data_path)
     data = preprocess_data(data, tokenizer, label2id, with_labels=False)
 
     print('dataset\n', data)
     print('detokenized\n', tokenizer.batch_decode(data['input_ids'][:3]))
+    
