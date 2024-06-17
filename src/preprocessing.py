@@ -7,6 +7,7 @@ from pandas import read_json, read_csv
 import os
 from tqdm import tqdm
 
+
 label2id = {
     'B-NAME_STUDENT': 0,
     'B-EMAIL': 1,

@@ -1,7 +1,6 @@
 from prediction import model
 import pandas as pd
 
-
 def postprocess_data(dataset, data_tokenized, predictions):
     document_list = []
     token_id_list = []

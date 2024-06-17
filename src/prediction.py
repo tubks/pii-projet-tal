@@ -2,6 +2,7 @@ from transformers import AutoTokenizer, AutoModelForTokenClassification
 import numpy as np
 import torch
 
+
 tokenizer = AutoTokenizer.from_pretrained(
     'roberta-base', add_prefix_space=True)
 model = AutoModelForTokenClassification.from_pretrained(
